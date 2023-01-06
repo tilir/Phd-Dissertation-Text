@@ -21,7 +21,7 @@ include compress.mk
 MKRC ?= latexmkrc
 
 # Source .tex file
-SOURCE ?= dissertation
+SOURCE ?= vladimirov
 
 # LaTeX compiler output .pdf file
 TARGET ?= $(SOURCE)
@@ -76,16 +76,22 @@ export TIKZFILE
 export USEDEV
 
 ##! компиляция всех файлов
-all: synopsis dissertation presentation
+all: synopsis dissertation vladimirov presentation
 
 define compile
 	latexmk -norc -r $(MKRC) $(LATEXMKFLAGS) $(BACKEND) -jobname=$(TARGET) $(SOURCE)
 endef
 
-##! компиляция диссертации
+##! компиляция полезного шаблона диссертации
 dissertation: TARGET=dissertation
 dissertation: SOURCE=dissertation
 dissertation:
+	$(compile)
+
+##! компиляция моей диссертации
+vladimirov: TARGET=vladimirov
+vladimirov: SOURCE=vladimirov
+vladimirov:
 	$(compile)
 
 ##! компиляция автореферата
@@ -171,6 +177,6 @@ distclean:
 # include after "all" rule
 include examples.mk
 
-.PHONY: all dissertation synopsis presentation dissertation-draft \
+.PHONY: all dissertation vladimirov synopsis presentation dissertation-draft \
 synopsis-draft pdflatex draft synopsis-booklet presentation-booklet\
 tikz release clean-target distclean-target clean distclean
