@@ -66,18 +66,17 @@
 \ifnumequal{\value{contnumtab}}{1}{\counterwithout{table}{chapter}
 }{\counterwithin{table}{chapter}}
 \include{Vladimirov/part1}           % Глава 1
+\include{Vladimirov/part2}           % Глава 2
+\include{Vladimirov/part3}           % Глава 3
+\include{Vladimirov/conclusion}      % Заключение
+\include{Vladimirov/acronyms}        % Список сокращений и условных обозначений
 
 \iffalse
-
-\include{Dissertation/part2}           % Глава 2
-\include{Dissertation/part3}           % Глава 3
-\include{Dissertation/conclusion}      % Заключение
-\include{Dissertation/acronyms}        % Список сокращений и условных обозначений
 \include{Dissertation/dictionary}      % Словарь терминов
-\include{Dissertation/references}      % Список литературы
-\include{Dissertation/lists}           % Списки таблиц и изображений (иллюстративный материал)
-
 \fi
+
+\include{Vladimirov/references}      % Список литературы
+\include{Vladimirov/lists}           % Списки таблиц и изображений (иллюстративный материал)
 
 \setcounter{totalchapter}{\value{chapter}} % Подсчёт количества глав
 

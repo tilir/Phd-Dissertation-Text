@@ -127,9 +127,12 @@ sorting=none,% настройка сортировки списка литера
 \fi
 
 %%% Подключение файлов bib %%%
-\addbibresource[label=bl-external]{biblio/external.bib}
-\addbibresource[label=bl-author]{biblio/author.bib}
-\addbibresource[label=bl-registered]{biblio/registered.bib}
+\addbibresource[label=bl-external]{biblio/vla-external.bib}
+\addbibresource[label=bl-author]{biblio/vla-author.bib}
+
+\iffalse
+\addbibresource[label=bl-registered]{biblio/vla-registered.bib}
+\fi
 
 %http://tex.stackexchange.com/a/141831/79756
 %There is a way to automatically map the language field to the langid field. The following lines in the preamble should be enough to do that.
