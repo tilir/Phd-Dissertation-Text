@@ -72,15 +72,13 @@
 \include{Vladimirov/acronyms}        % Список сокращений и условных обозначений
 
 \iffalse
-\include{Dissertation/dictionary}      % Словарь терминов
+\include{Vladimirov/dictionary}      % Словарь терминов
 \fi
 
 \include{Vladimirov/references}      % Список литературы
 \include{Vladimirov/lists}           % Списки таблиц и изображений (иллюстративный материал)
 
 \setcounter{totalchapter}{\value{chapter}} % Подсчёт количества глав
-
-\iffalse
 
 %%% Настройки для приложений
 \appendix
@@ -89,10 +87,8 @@
 \renewcommand*{\afterchapternum}{\par\nobreak\vskip \midchapskip}
 \renewcommand\thechapter{\Asbuk{chapter}} % Чтобы приложения русскими буквами нумеровались
 
-\include{Dissertation/appendix}        % Приложения
+\include{Vladimirov/appendix}        % Приложения
 
 \setcounter{totalappendix}{\value{chapter}} % Подсчёт количества приложений
-
-\fi
 
 \end{document}

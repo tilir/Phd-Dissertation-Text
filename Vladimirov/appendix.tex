@@ -1,0 +1,119 @@
+\chapter{Алгоритм восстановления SIMD CF}\label{app:A}
+
+\begin{ListingEnv}[!h]
+    \captiondelim{ } 
+    \caption{Анализ векторных управляющих конcтрукций, часть 1}\label{lst:simdcf-analysis}
+    \begin{Verb}
+procedure Find_SIMD_CF_Regions(Reg) returns set of SIMD_CF_Region
+  Reg: Region
+begin
+  regions: set of SIMD_CF_Region
+  bb: Basic_Block
+  for each bb in Reg do
+    if Is_SIMD_CF_Branch(bb.terminator) then
+      match: SIMD_CF_Region
+      match := Match(bb)
+      if match then
+        if Verify(match) then
+          regions append match
+        fi
+      fi
+    fi
+  od
+  return regions
+end
+
+procedure Is_SIMD_CF_Branch(Term) return boolean
+  Term: Instruction
+begin
+  cond: Instruction
+  cond := Term.condition
+  return cond in {llvm.vector.reduce.and, llvm.vector.reduce.or}
+end
+    \end{Verb}
+\end{ListingEnv}
+
+\begin{ListingEnv}[!h]
+    \captiondelim{ } 
+    \caption{Анализ векторных управляющих конcтрукций, часть 2}
+    \begin{Verb}
+procedure Match(BB) return SIMD_CF_Region
+  BB: Basic_Block
+begin
+  if MatchIf(BB) then
+    return SIMD_CF_If_Region(BB)
+  elif MatchLoop(BB) then
+    return SIMD_CF_Loop_Region(BB)
+  else
+    return nil
+end
+
+procedure MatchIf(Entry) return SIMD_CF_If_Region
+  Entry: Basic_Block
+begin
+  subregions: set of SIMD_CF_Region
+  has_else: boolean
+  if_begin, if_end, else_begin, else_end: Basic_Block
+  exit: Basic_Block
+  if_begin := Entry.true_succ
+  else_begin := Entry.false_succ
+  pred: Basic_Block
+  for each pred in else_begin.preds do
+    if pred != Entry then
+      if_end := pred
+    fi
+  od
+  subregions append Find_SIMD_CF_Regions(Region(if_begin, if_end))
+  if !if_end.terminator.conditional then
+    has_else := false
+    exit := else_begin
+    return SIMD_CF_If_Region(Entry, exit, has_else, subregions)
+  fi
+  has_else := true
+  exit := if_end.false_succ
+  for each pred in exit.preds do
+    if pred != if_end then
+      else_end := pred
+    fi
+  od
+  subregions append Find_SIMD_CF_Regions(Region(else_begin, else_end))
+  return SIMD_CF_If_Region(Entry, exit, has_else, subregions)
+end
+    \end{Verb}
+\end{ListingEnv}
+
+\begin{ListingEnv}[!h]
+    \captiondelim{ } 
+    \caption{Анализ векторных управляющих конcтрукций, часть 3}
+    \begin{Verb}
+procedure MatchLoop(BranchingBB) return SIMD_CF_Loop_Region
+  BranchingBB: Basic_Block
+begin
+  loop: Loop
+  loop := Get_Loop(BranchingBB)
+  if !loop then
+    return nil
+  fi
+  subregions append Find_SIMD_CF_Regions(Region(loop.entering, loop.exiting))
+  return SIMD_CF_Loop_Region(loop, subregions)
+end
+
+procedure Verify(R) return boolean
+  R: SIMD_CF_Region
+begin
+  inst: Instruction
+  subreg: SIMD_CF_Region
+  for each inst in R do
+    if inst.has_side_effects and inst.mask != R.mask then
+      return false     
+    fi
+  od
+  for each subreg in R.subregions do
+    if !R.is_submask(subreg_mask) then
+      return false
+    fi
+  od
+  return true
+end
+    \end{Verb}
+\end{ListingEnv}
