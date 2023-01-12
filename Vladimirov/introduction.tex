@@ -37,39 +37,56 @@
   \item Разработать алгоритм восстановления векторного потока управления.
 \end{enumerate}
 
+\textbf{Объектом исследования} является работа с памятью и потоком управления в гетерогенных системах.
+
+\textbf{Предметом исследования} являются оптимизации в компиляторах для гетерогенных систем.
+
+\textbf{Научная новизна:} 
+\begin{enumerate}[beginpenalty=10000]
+  \item В диссертационной работе был разработан новый метод ступенчатого понижения промежуточного представления до векторных регионов.
+  \item Был разработан новый эффективный алгоритм поэлементного разбиения вложенных структур для улучшения векторизации.
+  \item Было разработано предикатное представление векторного потока управления в высокоуровневом промежуточном представлении и алгоритм его восстановления на уровне работы с регионами.
+\end{enumerate}
+
+\textbf{Практическая значимость} диссертационной работы заключается в разработанном методе ступенчатого понижения промежуточного представления, алгоритме разбиения структур и алгоритме восстановления векторного потока управления.
+
+Все разработанные методы и алгоритмы были использованы в Intel Graphics Compiler. Разработанные методы и алгоритмы позволили получить существенный прирост производительности на целевых приложениях.
+
+Результаты работы также внедрены в кафедральный курс «Обобщённое программирование» кафедры микропроцессорных технологий в интеллектуальных системах управления МФТИ.
+
+\textbf{Методология и методы исследования} основываются на базовых принципах системного анализа, правилах проектирования программного обеспечения, теории алгоритмов и теории графов и оптимизации.
+
+\textbf{Основные положения выносимые на защиту:}
+\begin{enumerate}[beginpenalty=10000]
+  \item Метод ступенчатого понижения промежуточного представления до векторных регионов. Заключается в добавлении в конвейер оптимизации компилятора для гетерогенной системы шести обязательных и четырёх оптимизационных пассов для работы с памятью и представлением потока управления.
+  \item Представления векторного потока управления в высокоуровневом промежуточном представлении 
+  \item Алгоритм восстановления векторного потока управления на уровне работы с регионами.
+  \item Алгоритм поэлементного разбиения вложенных структур для улучшения векторизации.
+\end{enumerate}
+
+\textbf{Достоверность} полученных результатов проверялась с помощью разработанного программного обеспечения путем замеров производительности вычислительных шейдеров на стандартных системах бенчмаркинга. Соответствие результатов необходимым целям обеспечивалось путём научно-технических консультаций с представителями отраслевой индустрии.
+
+\textbf{Апробация работы} основные результаты работы докладывались на
+\begin{itemize}
+  \item семинарах ФРКТ МФТИ, 2020-2022
+  \item семинарах и технических форумах в компании Intel, 2020-2021
+\end{itemize}
+
+\textbf{Личный вклад} автор заключается в:
+\begin{itemize}
+  \item разработке выносимых на защиту метода и алгоритмов.
+  \item программной реализации ключевых компонент созданного программного обеспечения.
+\end{itemize}
+
+\textbf{Публикации}. Основные результаты по теме диссертации изложены в 2 печатных изданиях, изданых в журнале, рекомендованном ВАК.
+
 \iffalse
 
-% TODO: такая структура это хорошая идея но мне пока не хочется портить common
-
-\newcommand{\actuality}{}
-\newcommand{\progress}{}
-\newcommand{\aim}{{\textbf\aimTXT}}
-\newcommand{\tasks}{\textbf{\tasksTXT}}
-\newcommand{\novelty}{\textbf{\noveltyTXT}}
-\newcommand{\influence}{\textbf{\influenceTXT}}
-\newcommand{\methods}{\textbf{\methodsTXT}}
-\newcommand{\defpositions}{\textbf{\defpositionsTXT}}
-\newcommand{\reliability}{\textbf{\reliabilityTXT}}
-\newcommand{\probation}{\textbf{\probationTXT}}
-\newcommand{\contribution}{\textbf{\contributionTXT}}
-\newcommand{\publications}{\textbf{\publicationsTXT}}
-
-\newcommand{\actuality}{\pdfbookmark[1]{Актуальность}{actuality}\underline{\textbf{\actualityTXT}}}
-\newcommand{\progress}{\pdfbookmark[1]{Разработанность темы}{progress}\underline{\textbf{\progressTXT}}}
-\newcommand{\aim}{\pdfbookmark[1]{Цели}{aim}\underline{{\textbf\aimTXT}}}
-\newcommand{\tasks}{\pdfbookmark[1]{Задачи}{tasks}\underline{\textbf{\tasksTXT}}}
-\newcommand{\aimtasks}{\pdfbookmark[1]{Цели и задачи}{aimtasks}\aimtasksTXT}
-\newcommand{\novelty}{\pdfbookmark[1]{Научная новизна}{novelty}\underline{\textbf{\noveltyTXT}}}
-\newcommand{\influence}{\pdfbookmark[1]{Практическая значимость}{influence}\underline{\textbf{\influenceTXT}}}
-\newcommand{\methods}{\pdfbookmark[1]{Методология и методы исследования}{methods}\underline{\textbf{\methodsTXT}}}
-\newcommand{\defpositions}{\pdfbookmark[1]{Положения, выносимые на защиту}{defpositions}\underline{\textbf{\defpositionsTXT}}}
-\newcommand{\reliability}{\pdfbookmark[1]{Достоверность}{reliability}\underline{\textbf{\reliabilityTXT}}}
-\newcommand{\probation}{\pdfbookmark[1]{Апробация}{probation}\underline{\textbf{\probationTXT}}}
-\newcommand{\contribution}{\pdfbookmark[1]{Личный вклад}{contribution}\underline{\textbf{\contributionTXT}}}
-\newcommand{\publications}{\pdfbookmark[1]{Публикации}{publications}\underline{\textbf{\publicationsTXT}}}
-
+% TODO: сделать vla-characteristic и сделать автореферат оттуда или просто копипаст?
 
 \input{common/characteristic} % Характеристика работы по структуре во введении и в автореферате не отличается (ГОСТ Р 7.0.11, пункты 5.3.1 и 9.2.1), потому её загружаем из одного и того же внешнего файла, предварительно задав форму выделения некоторым параметрам
+
+\fi
 
 \textbf{Объем и структура работы.} Диссертация состоит из~введения,
 \formbytotal{totalchapter}{глав}{ы}{}{},
@@ -86,4 +103,3 @@
 \formbytotal{totalcount@table}{таблиц}{у}{ы}{}.
 Список литературы содержит
 \formbytotal{citenum}{наименован}{ие}{ия}{ий}.
-\fi

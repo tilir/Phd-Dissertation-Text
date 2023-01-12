@@ -6,20 +6,23 @@
 
 \begin{ListingEnv}[!h]
     \captiondelim{ } 
-    \caption{Анализ векторных управляющих коснтрукций}\label{lst:simdcf-analysis}
+    \caption{Пример представления на LLVM IR}\label{lst:lowering/irrep}
     \begin{verbatim}
 // n = global_id[0]
 %9 = load <3 x i64>, <3 x i64> addrspace(4)* @__spirv_BuiltInGlobalInvocationId
 %10 = extractelement <3 x i64> %9, i64 0
+
 // ANptr = A + n; tmpAN = *ANptr
 %arrayidx.A.i = getelementptr inbounds i32, i32 addrspace(1)* %A, i64 %10
 %ANptr = addrspacecast i32 addrspace(1)* %arrayidx.A.i to i32 addrspace(4)*
 %tmpAN = load i32, i32 addrspace(4)* %ANptr
+
 // BNptr = B + n; tmpBN = *BNptr
 %arrayidx.B.i = getelementptr inbounds i32, i32 addrspace(1)* %B, i64 %10
 %BNptr = addrspacecast i32 addrspace(1)* %arrayidx.B.i to i32 addrspace(4)*
 %tmpBN = load i32, i32 addrspace(4)* %BNptr
 %add.i = add nsw i32 %tmpAN, %tmpBN
+
 // CNPtr = C + n; *CNPtr = tmpAN + tmpBN
 %arrayidx.C.i = getelementptr inbounds i32, i32 addrspace(1)* %add.ptr.i, i64 %10
 %CNPtr = addrspacecast i32 addrspace(1)* %arrayidx.C.i to i32 addrspace(4)*
