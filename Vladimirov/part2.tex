@@ -1,35 +1,36 @@
-\chapter{Ступенчатое понижение промежуточного представления}\label{ch:lowering}
+\chapter{Оптимизации в векторном компиляторе}\label{ch:lowering}
 
 \section{Предлагаемые улучшения в pass manager}\label{sec:lowering/passes}
 
-Представление на LLVM IR после высокоуровневого языка
+Представление на LLVM IR после высокоуровневого языка содержит адресные пространства и переводу указателей между типами пространств адресов. Кроме того мы можем тут видеть обобщённые операции загрузки и сохранения.
 
 \begin{ListingEnv}[!h]
     \captiondelim{ } 
     \caption{Пример представления на LLVM IR}\label{lst:lowering/irrep}
     \begin{verbatim}
 // n = global_id[0]
-%9 = load <3 x i64>, <3 x i64> addrspace(4)* @__spirv_BuiltInGlobalInvocationId
+%9 = load <3 x i64> addrspace(4)* @__spirv_GlobalId
 %10 = extractelement <3 x i64> %9, i64 0
 
 // ANptr = A + n; tmpAN = *ANptr
-%arrayidx.A.i = getelementptr inbounds i32, i32 addrspace(1)* %A, i64 %10
-%ANptr = addrspacecast i32 addrspace(1)* %arrayidx.A.i to i32 addrspace(4)*
+%A.i = getelementptr i32 addrspace(1)* %A, i64 %10
+%ANptr = cast i32 addrspace(1)* %A.i to i32 addrspace(4)*
 %tmpAN = load i32, i32 addrspace(4)* %ANptr
 
 // BNptr = B + n; tmpBN = *BNptr
-%arrayidx.B.i = getelementptr inbounds i32, i32 addrspace(1)* %B, i64 %10
-%BNptr = addrspacecast i32 addrspace(1)* %arrayidx.B.i to i32 addrspace(4)*
+%B.i = getelementptr i32 addrspace(1)* %B, i64 %10
+%BNptr = cast i32 addrspace(1)* %B.i to i32 addrspace(4)*
 %tmpBN = load i32, i32 addrspace(4)* %BNptr
 %add.i = add nsw i32 %tmpAN, %tmpBN
 
 // CNPtr = C + n; *CNPtr = tmpAN + tmpBN
-%arrayidx.C.i = getelementptr inbounds i32, i32 addrspace(1)* %add.ptr.i, i64 %10
-%CNPtr = addrspacecast i32 addrspace(1)* %arrayidx.C.i to i32 addrspace(4)*
+%C.i = getelementptr i32 addrspace(1)* %add.ptr.i, i64 %10
+%CNPtr = cast i32 addrspace(1)* %C.i to i32 addrspace(4)*
 store i32 %add.i, i32 addrspace(4)* %CNPtr
     \end{verbatim}
 \end{ListingEnv}
 
+Листинг~\cref{lst:lowering/irrep} немного упрощён для читаемости.
 
 \begin{figure}[ht]
     \centerfloat{
@@ -38,7 +39,7 @@ store i32 %add.i, i32 addrspace(4)* %CNPtr
     \caption{Высокоуровневый список трансформаций}\label{fig:highlevel-mgr}
 \end{figure}
 
-Высокоуровнеая схема менеджера пассов представлена на рисунке~\cref{fig:highlevel-mgr}
+Высокоуровневая схема менеджера пассов представлена на рисунке~\cref{fig:highlevel-mgr}
 
 \begin{figure}[ht]
     \centerfloat{
