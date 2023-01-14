@@ -2,7 +2,7 @@
 
 \begin{ListingEnv}[!h]
     \captiondelim{ } 
-    \caption{Анализ векторных управляющих конcтрукций, часть 1}\label{lst:simdcf-analysis}
+    \caption{Анализ векторных управляющих конcтрукций}\label{lst:simdcf-analysis}
     \begin{Verb}
 procedure Find_SIMD_CF_Regions(Reg) returns set of SIMD_CF_Region
   Reg: Region
@@ -34,8 +34,7 @@ end
 \end{ListingEnv}
 
 \begin{ListingEnv}[!h]
-    \captiondelim{ } 
-    \caption{Анализ векторных управляющих конcтрукций, часть 2}
+    \captiondelim{ }     
     \begin{Verb}
 procedure Match(BB) return SIMD_CF_Region
   BB: Basic_Block
@@ -84,7 +83,6 @@ end
 
 \begin{ListingEnv}[!h]
     \captiondelim{ } 
-    \caption{Анализ векторных управляющих конcтрукций, часть 3}
     \begin{Verb}
 procedure MatchLoop(BranchingBB) return SIMD_CF_Loop_Region
   BranchingBB: Basic_Block

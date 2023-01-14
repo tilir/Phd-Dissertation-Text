@@ -1,36 +1,14 @@
 \chapter{Оптимизации в векторном компиляторе}\label{ch:lowering}
 
-\section{Предлагаемые улучшения в pass manager}\label{sec:lowering/passes}
+\section{Метод ступенчатого понижения}\label{sec:lowering/passes}
 
-Представление на LLVM IR после высокоуровневого языка содержит адресные пространства и переводу указателей между типами пространств адресов. Кроме того мы можем тут видеть обобщённые операции загрузки и сохранения.
+Место ступенчатого понижения в списке трансформаций графического компилятора выбирается из следующих соображений.
 
-\begin{ListingEnv}[!h]
-    \captiondelim{ } 
-    \caption{Пример представления на LLVM IR}\label{lst:lowering/irrep}
-    \begin{verbatim}
-// n = global_id[0]
-%9 = load <3 x i64> addrspace(4)* @__spirv_GlobalId
-%10 = extractelement <3 x i64> %9, i64 0
-
-// ANptr = A + n; tmpAN = *ANptr
-%A.i = getelementptr i32 addrspace(1)* %A, i64 %10
-%ANptr = cast i32 addrspace(1)* %A.i to i32 addrspace(4)*
-%tmpAN = load i32, i32 addrspace(4)* %ANptr
-
-// BNptr = B + n; tmpBN = *BNptr
-%B.i = getelementptr i32 addrspace(1)* %B, i64 %10
-%BNptr = cast i32 addrspace(1)* %B.i to i32 addrspace(4)*
-%tmpBN = load i32, i32 addrspace(4)* %BNptr
-%add.i = add nsw i32 %tmpAN, %tmpBN
-
-// CNPtr = C + n; *CNPtr = tmpAN + tmpBN
-%C.i = getelementptr i32 addrspace(1)* %add.ptr.i, i64 %10
-%CNPtr = cast i32 addrspace(1)* %C.i to i32 addrspace(4)*
-store i32 %add.i, i32 addrspace(4)* %CNPtr
-    \end{verbatim}
-\end{ListingEnv}
-
-Листинг~\cref{lst:lowering/irrep} немного упрощён для читаемости.
+\begin{enumerate}
+\item Должна отработать трансляция из SPIRV.
+\item Также должны отработать основные высокоуровневые платформенно-независимые оптимизации.
+\item При этом не должны быть легализованы инструкции и не должна быть начата кодогенерация.
+\end{enumerate}
 
 \begin{figure}[ht]
     \centerfloat{
@@ -39,7 +17,16 @@ store i32 %add.i, i32 addrspace(4)* %CNPtr
     \caption{Высокоуровневый список трансформаций}\label{fig:highlevel-mgr}
 \end{figure}
 
-Высокоуровневая схема менеджера пассов представлена на рисунке~\cref{fig:highlevel-mgr}
+Высокоуровневая схема менеджера пассов представлена на рисунке~\cref{fig:highlevel-mgr}. Выбор места обосновывается как результатами экспериментов, так и следующими соображениями.
+
+\begin{itemize}
+\item Трансформация операций копирования возможна только после того как эта операция распознана как идиома, то есть после оптимизаций над высокоуровневым IR.
+\item Разрешение адресных пространств может породить много платформенно-зависимого кода и должно идти до оптимизаций над легализованными инструкциями.
+\item Трансформация приватных операций с памятью и выделение спиллов должно идти после цикловых оптимизаций, но до вставки пролога и эпилога.
+\item TODO: расписать все соображения.
+\end{itemize}
+
+Важно подчеркнуть, что метод применим к любой системе и любому уровню промежуточного представления с минимальными модификациями. 
 
 \begin{figure}[ht]
     \centerfloat{
@@ -48,7 +35,58 @@ store i32 %add.i, i32 addrspace(4)* %CNPtr
     \caption{Детальный список трансформаций}\label{fig:passmgr}
 \end{figure}
 
-Детальный pass manager представлен на рисунке~\cref{fig:passmgr}
+Детальный список трансформаций представлен на рисунке~\cref{fig:passmgr}. В нём есть два вида трансформаций -- обязательные легализации необходимые для представления высокоуровневых конструкций для векторной системы команд и необязательные оптимизации, которые оптимизируют представление, делая его более подходящим для высокоэффективных вычислений.
+
+\subsection{Высокоуровневое представление}\label{subsec:lowering/passes/highlevel}
+
+Представление на IR высокого уровня (HIR, high-level IR) после высокоуровневого языка содержит адресные пространства и трансформации типов указателей между типами пространств адресов. Кроме того там используются обобщённые операции загрузки и сохранения.
+
+\begin{ListingEnv}[!h]
+    \captiondelim{ } 
+    \caption{Пример представления на HIR}\label{lst:lowering/irrep}
+    \begin{Verb}
+%4 = tail call i32 @llvm.genx.group.id.x()
+%5 = extractelement <3 x i32> %local.size, i32 0
+%6 = mul i32 %4, %5
+%7 = extractelement <3 x i32> %local.id, i32 0
+%8 = add i32 %6, %7
+    \end{Verb}
+\end{ListingEnv}
+
+Листинг~\cref{lst:lowering/irrep} показывет загрузку вектора группового идентификатора, умножение на локальный размер и прибавление локального идентификатора как высокоуровневые операции.
+
+\subsection{Инварианты трансформаций}\label{subsec:lowering/passes/invariants}
+
+Предлагаемые трансформации имеют инварианты применения, представленные на рисунке~\cref{fig:highlevel-mgr-inv}. Поскольку предлагаемая методология является достаточно общей, важно понимать в каких случаях они могут быть ослаблены или усилены.
+
+\begin{figure}[ht]
+    \centerfloat{
+        \includegraphics[scale=0.4]{Vladimirov/images/highlevel-mgr-inv.pdf}
+    }
+    \caption{Инварианты при трансформациях}\label{fig:highlevel-mgr-inv}
+\end{figure}
+
+После оптимизаций над высокоуровневым представлением, память не обязательно представляется исключительно обобщёнными операциями. Например программист может написать явный векторный код, работающий с векторными загрузками из памяти. В этом случае высокоуровневые оптимизации вряд ли будут способны обработать такую операцию и на вход каскадного понижения она попадёт в неизменном виде.
+
+\subsection{Представление на регионах}\label{subsec:lowering/passes/lowlevel}
+
+Физическое представление на регионах может существовать во многих формах. Например в графическом компиляторе Intel оно существует в виде G4IR, в виде VISA и в виде XeISA. 
+
+\begin{ListingEnv}[!h]
+    \captiondelim{ } 
+    \caption{Пример физического представления}\label{lst:lowering/regrep}
+    \begin{Verb}
+mov (1|M0) r5.0<1>:uq r2.2<0;1,0>:uq
+send (8|M0) r1 r5 0xC 0x021D0AFF
+mov (1|M0) r6.0<1>:uq r2.3<0;1,0>:uq
+send (8|M0) r3 r6 0xC 0x021D0AFF
+add (8|M0) r4.0<1>:f r1.0<8;8,1>:f r3.0<8;8,1>:f
+mov (1|M0) r7.0<1>:uq r2.1<0;1,0>:uq
+sends (8|M0) r7 r4 0x4C 0x020D42FF
+    \end{Verb}
+\end{ListingEnv}
+
+Листинг~\cref{lst:lowering/regrep} показывает типичное представление на регионах того же самого кода, который высокоуровнево представлен на листинге~\cref{lst:lowering/irrep}.
 
 \section{Разбиение структур}\label{sec:lowering/splitter}
 
