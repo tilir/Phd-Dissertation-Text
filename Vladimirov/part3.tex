@@ -79,20 +79,37 @@ exit: ; preds = %entry, %then
 
 \subsection{Результаты ступенчатого понижения}\label{subsec:results/results/lowering}
 
-Результаты сведены в таблицу~\cref{tab:results/lowering}.
+Результаты сведены в таблицу~\cref{tab:results/lowering}. В ней введены следующие сокращения.
 
-\begin{table}
+\begin{itemize}
+\item \textbf{P} Пакет тестов в ESIMD тестировании
+\item \textbf{T} Трансформации приватных операций
+\item \textbf{G} Операции с глобальными объектами
+\item \textbf{A} Трансформация агрегатных типов
+\item \textbf{M} Понижение уровня операций работы с памятью
+\item \textbf{Pass} Пакет начал проходить с новым конвеером
+\end{itemize}
+
+\begin{table}[!h]
     \centering
     \captionsetup{justification=centering}
     \caption{Результаты ступенчатого понижения}\label{tab:results/lowering}
-    \begin{tabular}{llc|llc}
-        \toprule
-        Бенчмарк & Результат & Результат \\
-        \midrule
-        Первый   & \verb|+|  & \verb|+|  \\
-        Второй   & \verb| |  & \verb|+|  \\
-        Третий   & \verb|+|  & \verb| |  \\
-        \bottomrule
+    \begin{tabular}{|p{0.24\linewidth}|p{0.1\linewidth}|p{0.1\linewidth}|p{0.1\linewidth}|p{0.1\linewidth}|p{0.1\linewidth}|}
+        \hline
+        P & T & G & A & M & Pass \\ \hline        
+        glob   & \verb|+| & \verb|+| & \verb|-| & \verb|-| & \verb|+| \\ \hline
+        dpas   & \verb|+| & \verb|-| & \verb|+| & \verb|+| & \verb|+| \\ \hline
+        lsc    & \verb|+| & \verb|-| & \verb|+| & \verb|-| & \verb|~| \\ \hline
+        atomic & \verb|-| & \verb|+| & \verb|-| & \verb|+| & \verb|~| \\ \hline
+        slm    & \verb|-| & \verb|-| & \verb|-| & \verb|+| & \verb|+| \\ \hline
+        vec\_arg\_call\_conv & 
+                 \verb|+| & \verb|+| & \verb|-| & \verb|-| & \verb|+| \\ \hline
+        gather\_scatter    & 
+                 \verb|-| & \verb|-| & \verb|+| & \verb|+| & \verb|+| \\ \hline
+        ctor\_codegen      & 
+                 \verb|-| & \verb|-| & \verb|-| & \verb|+| & \verb|+| \\ \hline
+        simd\_copy & 
+                 \verb|+| & \verb|+| & \verb|-| & \verb|+| & \verb|~| \\ \hline
     \end{tabular}
 \end{table}
 
